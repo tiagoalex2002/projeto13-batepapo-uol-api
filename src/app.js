@@ -8,7 +8,6 @@ import dayjs from "dayjs"
 const app= express()
 app.use(cors())
 app.use(express.json())
-app.listen(5000, () => console.log("Servidor rodando"))
 dotenv.config()
 
 //Mongo Database configurantions and setup
@@ -37,7 +36,18 @@ app.post("/messages",(req,res)=> {
     .catch(err=> console.log(err.message))
 
 })
-//app.post("/status",(req,res))
+
+app.post("/status",(req,res) => {
+    const user=req.headers.user;
+    if (!user){
+        res.sendStatus(404)
+    }
+    else{
+        db.collection("participants").findOne({name: user})
+        .then(participants => participants.lastStatus= Date.now())
+        .catch(err => res.sendStatus(404))
+    }
+})
 
 
 app.get("/participants",(req,res) => {
@@ -46,3 +56,7 @@ app.get("/participants",(req,res) => {
     .catch(err=> console.log(err.message))
 })
 //app.get("/messages",(req,res))
+
+
+
+app.listen(5000, () => console.log("Servidor rodando"))
