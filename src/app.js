@@ -19,7 +19,7 @@ mongoclient.connect().catch((er)=>console.log(er.message))
 
 
 app.post("/participants",(req,res)=>{
-    const {name} = req.name;
+    const {name} = req.body;
     let now= dayjs()
     db.collection("participants").insertOne({name:name, lastStatus: Date.now()})
     .then(participants => {res.sendStatus(201);db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
