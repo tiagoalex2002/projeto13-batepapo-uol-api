@@ -13,7 +13,7 @@ dotenv.config()
 
 //Mongo Database configurantions and setup
 let db
-const mongoclient= new MongoClient()
+const mongoclient= new MongoClient(process.env.DATABASE_URL)
 mongoclient.connect().then(()=> db=mongoclient.db())
 mongoclient.connect().catch((er)=>console.log(er.message))
 
@@ -28,9 +28,16 @@ app.post("/participants",(req,res)=>{
     .catch(err=>console.log(err.message)))
     .catch(err=> console.log(err.message))
 })
-app.post("/messages",(req,res))
+app.post("/messages",(req,res)=> {
+    const {to,text,type}= req.body;
+
+})
 app.post("/status",(req,res))
 
 
-app.get("/participants",(req,res))
+app.get("/participants",(req,res) => {
+    db.collection("participants").find().toArray()
+    .then(participants => res.send(participants))
+    .catch(err=> console.log(err.message))
+})
 app.get("/messages",(req,res))
