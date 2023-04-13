@@ -30,9 +30,14 @@ app.post("/participants",(req,res)=>{
 })
 app.post("/messages",(req,res)=> {
     const {to,text,type}= req.body;
+    const user= req.headers.user;
+    let now= dayjs()
+    db.collection("messages").insertOne({from: user, to: to, text: text, type: type, time:now.format("HH:mm:ss")})
+    .then(messages => res.sendStatus(201))
+    .catch(err=> console.log(err.message))
 
 })
-app.post("/status",(req,res))
+//app.post("/status",(req,res))
 
 
 app.get("/participants",(req,res) => {
@@ -40,4 +45,4 @@ app.get("/participants",(req,res) => {
     .then(participants => res.send(participants))
     .catch(err=> console.log(err.message))
 })
-app.get("/messages",(req,res))
+//app.get("/messages",(req,res))
