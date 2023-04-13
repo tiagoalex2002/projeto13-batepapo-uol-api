@@ -22,9 +22,9 @@ app.post("/participants",(req,res)=>{
     const {name} = req.name;
     let now= dayjs()
     db.collection("participants").insertOne({name:name, lastStatus: Date.now()})
-    .then(participants => db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
+    .then(participants => {res.sendStatus(201);db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
     .then(messages => res.sendStatus(201))
-    .catch(err=>console.log(err.message)))
+    .catch(err=>console.log(err.message))})
     .catch(err=> console.log(err.message))
 })
 app.post("/messages",(req,res)=> {
