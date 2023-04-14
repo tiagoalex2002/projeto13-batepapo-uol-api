@@ -55,7 +55,13 @@ app.get("/participants",(req,res) => {
     .then(participants => res.send(participants))
     .catch(err=> console.log(err.message))
 })
-//app.get("/messages",(req,res))
+
+app.get("/messages",(req,res)=>{
+    const user= req.headers.user;
+    db.collection("messages").find({to:"Todos"}).toArray().then(messages=> res.send(messages))
+    db.collection("messages").find({to:user}).toArray().then(messages=> res.send(messages))
+    db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
+})
 
 
 
