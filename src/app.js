@@ -37,15 +37,21 @@ app.post("/messages",(req,res)=> {
 
 })
 
-app.post("/status",(req,res) => {
-    const user=req.headers.user;
+app.post("/status", async (req,res) => {
+    const name=req.headers.user;
+    let lastStatus= Date.now()
+    const usuarioEditado = { name, lastStatus }
     if (!user){
         res.sendStatus(404)
     }
     else{
-        db.collection("participants").findOne({name: user})
-        .then(participants => participants.lastStatus= Date.now())
-        .catch(err => res.sendStatus(404))
+        try{
+            await db.collections("participants").updateOne({name: name}, {$set: usuarioEditado })
+            res.sendStatus(200)
+
+        } catch(err){
+            res.sendStatus(404)
+        }
     }
 })
 
