@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors"
-import { MongoClient } from "mongodb"
+import { MongoClient, ObjectId } from "mongodb"
 import dotenv from "dotenv"
 import dayjs from "dayjs"
 
@@ -68,6 +68,21 @@ app.get("/messages",(req,res)=>{
     db.collection("messages").find({to:"Todos"}).toArray().then(messages=> res.send(messages))
     db.collection("messages").find({to:user}).toArray().then(messages=> res.send(messages))
     db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
+})
+
+app.delete("/messages/ID_DA_MENSAGEM",async (req,res) =>{
+    const user= req.headers.user;
+    const {ID_DA_MENSAGEM} = req.params;
+    try{
+        await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+    } catch(err){
+        res.sendStatus(404)
+    }
+    try{
+        await db.collection("messages").deleteOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+    } catch(err){
+        res.sendStatus(401)
+    }
 })
 
 
