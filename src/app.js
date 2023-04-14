@@ -22,7 +22,7 @@ app.post("/participants",(req,res)=>{
     const {name} = req.body;
     let now= dayjs()
     db.collection("participants").insertOne({name:name, lastStatus: Date.now()})
-    .then(participants => {res.sendStatus(201);db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
+    .then(participants => {db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
     .then(messages => res.sendStatus(201))
     .catch(err=>console.log(err.message))})
     .catch(err=> console.log(err.message))
@@ -41,12 +41,12 @@ app.post("/status", async (req,res) => {
     const name=req.headers.user;
     let lastStatus= Date.now()
     const usuarioEditado = { name, lastStatus }
-    if (!user){
-        res.sendStatus(404)
+    if (!name){
+        return res.sendStatus(404)
     }
     else{
         try{
-            await db.collections("participants").updateOne({name: name}, {$set: usuarioEditado })
+            await db.collection("participants").updateOne({name: name}, {$set: usuarioEditado })
             res.sendStatus(200)
 
         } catch(err){
