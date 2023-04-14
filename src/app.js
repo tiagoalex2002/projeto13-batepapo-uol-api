@@ -65,12 +65,7 @@ app.get("/participants",(req,res) => {
 app.get("/messages",(req,res)=>{
     const user= req.headers.user;
     const limit = parseInt(req.query.limit);
-    if(!limit){
-        db.collection("messages").find({to:"Todos"}).toArray().then(messages=> res.send(messages))
-        db.collection("messages").find({to:user}).toArray().then(messages=> res.send(messages))
-        db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
-    }
-    else if(limit > 0){
+     if(limit > 0){
         let array=[]
         let newarray=[]
         db.collection("messages").find({to:"Todos"}).toArray().then(messages=> array.push(messages))
@@ -82,7 +77,10 @@ app.get("/messages",(req,res)=>{
         res.send(newarray)
     }
     else{
-        res.sendStatus(422)
+            db.collection("messages").find({to:"Todos"}).toArray().then(messages=> res.send(messages))
+            db.collection("messages").find({to:user}).toArray().then(messages=> res.send(messages))
+            db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
+        
     }
 })
 
