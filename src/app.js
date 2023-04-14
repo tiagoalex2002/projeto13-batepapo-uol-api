@@ -70,6 +70,8 @@ app.get("/messages",(req,res)=>{
     db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
 })
 
+
+//Métodos Bônus - Delete e Put
 app.delete("/messages/ID_DA_MENSAGEM",async (req,res) =>{
     const user= req.headers.user;
     const {ID_DA_MENSAGEM} = req.params;
@@ -80,6 +82,33 @@ app.delete("/messages/ID_DA_MENSAGEM",async (req,res) =>{
     }
     try{
         await db.collection("messages").deleteOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+        res.sendStatus(200)
+    } catch(err){
+        res.sendStatus(401)
+    }
+})
+
+app.put("/messages/ID_DA_MENSAGEM", async (req, res) => {
+    const {to, type, text}= req.body
+    const {ID_DA_MENSAGEM} = req.params;
+    const user= req.headers.user;
+    const usuarioEditado= {to, type, text}
+
+
+    try{
+        await db.collection("messages").findOne({_from: user})
+    } catch(err){
+        res.sendStatus(401)
+    }
+
+    try{
+        await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+    } catch(err){
+        res.sendStatus(404)
+    }
+    try{
+        await db.collection("messages").updateOne({to: to, type: type, text: text}, {$set : usuarioEditado})
+        res.sendStatus(200)
     } catch(err){
         res.sendStatus(401)
     }
