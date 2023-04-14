@@ -65,23 +65,9 @@ app.get("/participants",(req,res) => {
 app.get("/messages",(req,res)=>{
     const user= req.headers.user;
     const limit = parseInt(req.query.limit);
-     if(limit > 0){
-        let array=[]
-        let newarray=[]
-        db.collection("messages").find({to:"Todos"}).toArray().then(messages=> array.push(messages))
-        db.collection("messages").find({to:user}).toArray().then(messages=> array.push(messages))
-        db.collection("messages").find({from:user}).toArray().then(messages=> array.push(messages))
-        for(let i=1; i<=limit;i++){
-            newarray.push(array[array.length -i])
-        }
-        res.send(newarray)
-    }
-    else{
-            db.collection("messages").find({to:"Todos"}).toArray().then(messages=> res.send(messages))
-            db.collection("messages").find({to:user}).toArray().then(messages=> res.send(messages))
-            db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
-        
-    }
+    db.collection("messages").find({to:"Todos"}).toArray().then(messages=> res.send(messages))
+    db.collection("messages").find({to:user}).toArray().then(messages=> res.send(messages))
+    db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
 })
 
 
