@@ -33,7 +33,6 @@ app.post("/participants",async (req,res)=>{
             //res.status(409).send("Usuário já cadastrado")
        // }
     //} catch(err){
-        console.log(err.message)
     //}
     let now= dayjs()
     try{
