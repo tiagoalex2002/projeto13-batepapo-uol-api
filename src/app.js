@@ -31,16 +31,18 @@ app.post("/participants",async (req,res)=>{
     }
     try{
         await db.collection("participants").findOne({name: req.body.name})
-         res.sendStatus(409)
+         return res.sendStatus(409)
     } catch(err){
         console.log(err.message)
     }
     let now= dayjs()
-    db.collection("participants").insertOne(participants)
-    .then(participants => {db.collection("messages").insertOne({from: req.body.name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
-    .then(messages => res.sendStatus(201))
-    .catch(err=>console.log(err.message))})
-    .catch(err=> console.log(err.message))
+    try{
+        await db.collection("participants").insertOne(participants)
+        await db.collection("messages").insertOne({from: req.body.name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
+        res.sendStatus(201)
+    }catch(err){
+        console.log(err.message)
+    }
 })
 app.post("/messages", async (req,res)=> {
     const message= req.body;
@@ -100,12 +102,35 @@ app.get("/participants",(req,res) => {
     .catch(err=> console.log(err.message))
 })
 
-app.get("/messages",(req,res)=>{
+app.get("/messages", async (req,res)=>{
     const user= req.headers.user;
     const limit = parseInt(req.query.limit);
-    db.collection("messages").find({to:"Todos"}).toArray().then(messages=> res.send(messages))
-    db.collection("messages").find({to:user}).toArray().then(messages=> res.send(messages))
-    db.collection("messages").find({from:user}).toArray().then(messages=> res.send(messages))
+    let newmens=[]
+    if (!limit){
+        try{
+            let messages= await db.collection("messages").find({to:"Todos"} || {to:user} || {from:user}).toArray()
+            res.status(200).send(messages)
+        } catch(err){
+            console.log(err.message)
+        }
+    }
+    else if( limit === 0 || limit < 0 || typeof limit != "number"){
+        return res.sendStatus(422)
+    }
+    else{
+        try{
+            let messages= await db.collection("messages").find({to:"Todos"} || {to:user} || {from:user}).toArray()
+            if (messages.length >= limit){
+                for(let i=0; i < limit;i++){
+                    newmens.push(messages[i])
+                }
+            }
+            res.status(200).send(newmens)
+        } catch(err){
+            console.log(err.message)
+        }
+    }
+    
 })
 
 
