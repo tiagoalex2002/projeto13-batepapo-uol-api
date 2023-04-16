@@ -24,13 +24,13 @@ app.post("/participants",async (req,res)=>{
     const  participantSchema= joi.object({
         name: joi.string().required()
     })
-    const participants = {name: participant, lastStatus: Date.now()}
+    const participants = {name: req.body.name, lastStatus: Date.now()}
     const validation= participantSchema.validate(participant)
     if(validation.error){
         return res.sendStatus(422)
     }
     try{
-        await db.collection("participants").findOne({name: name})
+        await db.collection("participants").findOne({name: req.body.name})
          res.sendStatus(409)
     } catch(err){
         console.log(err.message)
@@ -48,7 +48,7 @@ app.post("/messages", async (req,res)=> {
     const messageSchema= joi.object({
         to: string().required(),
         text:string().required(),
-        type: string().required("message" || "private_message")
+        type: string().required()
     })
     const validate= messageSchema.validate(req.body)
     if(validate.error){
