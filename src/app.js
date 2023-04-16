@@ -3,6 +3,7 @@ import cors from "cors"
 import { MongoClient, ObjectId } from "mongodb"
 import dotenv from "dotenv"
 import dayjs from "dayjs"
+import joi from "joi"
 
 //API's structure configurations
 const app= express()
@@ -18,22 +19,54 @@ mongoclient.connect().catch((er)=>console.log(er.message))
 
 
 
-app.post("/participants",(req,res)=>{
-    const {name} = req.body;
+app.post("/participants",async (req,res)=>{
+    const participant= req.body
+    const  participantSchema= joi.object({
+        name: joi.string().required()
+    })
+    const participants = {name:name, lastStatus: Date.now()}
+    const validation= participantSchema.validate(participant)
+    if(validation.error){
+        return res.sendStatus(422)
+    }
+    try{
+        await db.collection("participants").findOne({name: name})
+         res.sendStatus(409)
+    } catch(err){
+        console.log(err.message)
+    }
     let now= dayjs()
-    db.collection("participants").insertOne({name:name, lastStatus: Date.now()})
+    db.collection("participants").insertOne(participants)
     .then(participants => {db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
     .then(messages => res.sendStatus(201))
     .catch(err=>console.log(err.message))})
     .catch(err=> console.log(err.message))
 })
-app.post("/messages",(req,res)=> {
-    const {to,text,type}= req.body;
+app.post("/messages", async (req,res)=> {
+    const message= req.body;
     const user= req.headers.user;
+    const messageSchema= joi.object({
+        to: string().required(),
+        text:string().required(),
+        type: string().required("message" || "private_message")
+    })
+    const validate= messageSchema.validation(req.body)
+    if(validate.error){
+        return res.sendStatus(422)
+    }
+    try{
+        await db.collection("participants").findOne({name: user})
+         res.sendStatus(409)
+    } catch(err){
+        console.log(err.message)
+    }
     let now= dayjs()
-    db.collection("messages").insertOne({from: user, to: to, text: text, type: type, time:now.format("HH:mm:ss")})
-    .then(messages => res.sendStatus(201))
-    .catch(err=> console.log(err.message))
+   try{
+        await  db.collection("messages").insertOne({from: user, to: to, text: text, type: type, time:now.format("HH:mm:ss")})
+        res.sendStatus(201)
+   } catch(err){
+    console.log(err.message)
+   }
 
 })
 
@@ -45,6 +78,11 @@ app.post("/status", async (req,res) => {
         return res.sendStatus(404)
     }
     else{
+        try{
+            await db.collection("participants").findOne({name: name})
+        } catch(err){
+            res.sendStatus(404)
+        }
         try{
             await db.collection("participants").updateOne({name: name}, {$set: usuarioEditado })
             res.sendStatus(200)
