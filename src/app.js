@@ -20,29 +20,32 @@ mongoclient.connect().catch((er)=>console.log(er.message))
 
 
 app.post("/participants",async (req,res)=>{
-    const participant= req.body
     const  participantSchema= joi.object({
         name: joi.string().required()
     })
-    const participants = {name: req.body.name, lastStatus: Date.now()}
-    const validation= participantSchema.validate(participant)
+    const validation= participantSchema.validate(req.body)
     if(validation.error){
         return res.sendStatus(422)
     }
     try{
         await db.collection("participants").findOne({name: req.body.name})
-         return res.sendStatus(409)
+         return res.status(409).send("Usuário já cadastrado")
     } catch(err){
         console.log(err.message)
     }
     let now= dayjs()
     try{
-        await db.collection("participants").insertOne(participants)
-        await db.collection("messages").insertOne({from: req.body.name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
-        res.sendStatus(201)
+        await db.collection("participants").insertOne({name: req.body.name, lastStatus: Date.now()})
     }catch(err){
         console.log(err.message)
     }
+    try{
+        await db.collection("messages").insertOne({from: req.body.name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
+        return res.sendStatus(201)
+    }catch(err){
+        console.log(err.message)
+    }
+
 })
 app.post("/messages", async (req,res)=> {
     const message= req.body;
@@ -58,14 +61,14 @@ app.post("/messages", async (req,res)=> {
     }
     try{
         await db.collection("participants").findOne({name: user})
-         res.sendStatus(409)
+         return res.sendStatus(409)
     } catch(err){
         console.log(err.message)
     }
     let now= dayjs()
    try{
         await  db.collection("messages").insertOne({from: user, to: req.body.to, text: req.body.text, type: req.body.type, time:now.format("HH:mm:ss")})
-        res.sendStatus(201)
+        return res.sendStatus(201)
    } catch(err){
     console.log(err.message)
    }
@@ -109,7 +112,7 @@ app.get("/messages", async (req,res)=>{
     if (!limit){
         try{
             let messages= await db.collection("messages").find({to:"Todos"} || {to:user} || {from:user}).toArray()
-            res.status(200).send(messages)
+            return res.status(200).send(messages)
         } catch(err){
             console.log(err.message)
         }
@@ -125,7 +128,7 @@ app.get("/messages", async (req,res)=>{
                     newmens.push(messages[i])
                 }
             }
-            res.status(200).send(newmens)
+            return res.status(200).send(newmens)
         } catch(err){
             console.log(err.message)
         }
