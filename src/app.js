@@ -27,14 +27,14 @@ app.post("/participants",async (req,res)=>{
     if(validation.error){
         return res.sendStatus(422)
     }
-    try{
-        let us= await db.collection("participants").findOne({name: req.body.name})
-        if(us != {}){
-            res.status(409).send("Usuário já cadastrado")
-        }
-    } catch(err){
+    //try{
+        //let us= await db.collection("participants").findOne({name: req.body.name})
+        //if(us != {}){
+            //res.status(409).send("Usuário já cadastrado")
+       // }
+    //} catch(err){
         console.log(err.message)
-    }
+    //}
     let now= dayjs()
     try{
         await db.collection("participants").insertOne({name: req.body.name, lastStatus: Date.now()})
