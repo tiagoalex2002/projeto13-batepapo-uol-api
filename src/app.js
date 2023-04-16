@@ -24,7 +24,7 @@ app.post("/participants",async (req,res)=>{
     const  participantSchema= joi.object({
         name: joi.string().required()
     })
-    const participants = {name:name, lastStatus: Date.now()}
+    const participants = {name: participant, lastStatus: Date.now()}
     const validation= participantSchema.validate(participant)
     if(validation.error){
         return res.sendStatus(422)
@@ -37,7 +37,7 @@ app.post("/participants",async (req,res)=>{
     }
     let now= dayjs()
     db.collection("participants").insertOne(participants)
-    .then(participants => {db.collection("messages").insertOne({from: name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
+    .then(participants => {db.collection("messages").insertOne({from: req.body.name, to: 'Todos', text: 'entra na sala...', type:'status', time: now.format("HH:mm:ss")})
     .then(messages => res.sendStatus(201))
     .catch(err=>console.log(err.message))})
     .catch(err=> console.log(err.message))
@@ -50,7 +50,7 @@ app.post("/messages", async (req,res)=> {
         text:string().required(),
         type: string().required("message" || "private_message")
     })
-    const validate= messageSchema.validation(req.body)
+    const validate= messageSchema.validate(req.body)
     if(validate.error){
         return res.sendStatus(422)
     }
@@ -62,7 +62,7 @@ app.post("/messages", async (req,res)=> {
     }
     let now= dayjs()
    try{
-        await  db.collection("messages").insertOne({from: user, to: to, text: text, type: type, time:now.format("HH:mm:ss")})
+        await  db.collection("messages").insertOne({from: user, to: req.body.to, text: req.body.text, type: re.body.type, time:now.format("HH:mm:ss")})
         res.sendStatus(201)
    } catch(err){
     console.log(err.message)
