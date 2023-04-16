@@ -28,8 +28,10 @@ app.post("/participants",async (req,res)=>{
         return res.sendStatus(422)
     }
     try{
-        await db.collection("participants").findOne({name: req.body.name})
-        res.status(409).send("Usuário já cadastrado")
+        let us= await db.collection("participants").findOne({name: req.body.name})
+        if(us != {}){
+            res.status(409).send("Usuário já cadastrado")
+        }
     } catch(err){
         console.log(err.message)
     }
