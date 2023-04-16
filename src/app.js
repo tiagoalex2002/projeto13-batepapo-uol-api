@@ -62,7 +62,7 @@ app.post("/messages", async (req,res)=> {
     }
     let now= dayjs()
    try{
-        await  db.collection("messages").insertOne({from: user, to: req.body.to, text: req.body.text, type: re.body.type, time:now.format("HH:mm:ss")})
+        await  db.collection("messages").insertOne({from: user, to: req.body.to, text: req.body.text, type: req.body.type, time:now.format("HH:mm:ss")})
         res.sendStatus(201)
    } catch(err){
     console.log(err.message)
