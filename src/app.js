@@ -36,7 +36,7 @@ app.post("/participants",async (req,res)=>{
     let now= dayjs()
     try{
         await db.collection("participants").insertOne({name: req.body.name, lastStatus: Date.now()})
-        return res.sendStatus(201)
+        res.sendStatus(201)
     }catch(err){
         console.log(err.message)
     }
