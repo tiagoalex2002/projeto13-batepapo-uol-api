@@ -27,12 +27,12 @@ app.post("/participants",async (req,res)=>{
     if(validation.error){
         return res.sendStatus(422)
     }
-   // try{
-        //await db.collection("participants").findOne({name: req.body.name})
-        // return res.status(409).send("Usuário já cadastrado")
-   // } catch(err){
-       // console.log(err.message)
-    //}
+    try{
+        await db.collection("participants").findOne({name: req.body.name})
+        res.status(409).send("Usuário já cadastrado")
+    } catch(err){
+        console.log(err.message)
+    }
     let now= dayjs()
     try{
         await db.collection("participants").insertOne({name: req.body.name, lastStatus: Date.now()})
@@ -62,7 +62,7 @@ app.post("/messages", async (req,res)=> {
     }
     try{
         await db.collection("participants").findOne({name: user})
-         return res.sendStatus(409)
+         res.sendStatus(409)
     } catch(err){
         console.log(err.message)
     }
