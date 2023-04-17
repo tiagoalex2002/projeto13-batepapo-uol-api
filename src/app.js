@@ -112,38 +112,31 @@ app.get("/participants",(req,res) => {
     .catch(err=> console.log(err.message))
 })
 
-app.get("/messages", async (req,res)=>{
-    const {user}= req.headers;
+app.get('/messages', async (req, res) => {
+    const { user } = req.headers;
     const limit = req.query.limit;
-    let newmens=[]
-    if (limit ){
-         if( limit === 0 || limit < 0 || typeof limit !== "number"){
-            return res.sendStatus(422)}
-        try{
-            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:`${user}`} ,{from:`${user}`}]}).toArray()
-            if (messages.length >= limit){
-                for(let i=0; i < limit;i++){
-                    newmens.push(messages[i])
-                }
-            }
-            return res.status(200).send(newmens)
-        } catch(err){
-            console.log(err.message)
+    try {
+      if (limit) {
+        if (limit <= 0 || isNaN(limit)) {
+          return res.sendStatus(422);
         }
-       
+        let messages = await db
+          .collection('messages')
+          .find({ $or: [{ to: 'Todos' }, { to: `${user}` }, { from: `${user}` }] })
+          .toArray();
+        const newmens = messages.slice(messages.length - limit, messages.length);
+        return res.status(200).send(newmens);
+      } else {
+        let messages = await db
+          .collection('messages')
+          .find({ $or: [{ to: 'Todos' }, { to: `${user}` }, { from: `${user}` }] })
+          .toArray();
+        return res.status(200).send(messages);
+      }
+    } catch (err) {
+      console.log(err.message);
     }
-    if(!limit){
-        try{
-            const messages= await db.collection("messages").find(
-                {$or :[{to:"Todos"},{to:`${user}`} ,{from:`${user}`}]}).toArray()
-            return res.status(200).send(messages)
-        } catch(err){
-            console.log(err.message)
-        }
-    }
-    
-})
-
+  });
 
 //Métodos Bônus - Delete e Put
 app.delete("/messages/:ID_DA_MENSAGEM",async (req,res) =>{
