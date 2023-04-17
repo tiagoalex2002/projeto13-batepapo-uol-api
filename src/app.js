@@ -217,6 +217,8 @@ app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
 
 //Remoção de usuários inativos
 
+setInterval(async)
+
 
 
 app.listen(5000, () => console.log("Servidor rodando"))
