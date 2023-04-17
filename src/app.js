@@ -66,7 +66,7 @@ app.post("/messages", async (req,res)=> {
     }
     try{
         let us= await db.collection("participants").findOne({name: user})
-        if(us){return res.sendStatus(409)}
+        if(!us){return res.sendStatus(422)}
     } catch(err){
         console.log(err.message)
    }
@@ -177,23 +177,40 @@ app.put("/messages/ID_DA_MENSAGEM", async (req, res) => {
     const user= req.headers.user;
     const usuarioEditado= {to, type, text}
 
-
-    try{
-        await db.collection("messages").findOne({_from: user})
-    } catch(err){
-        res.sendStatus(401)
+     const messageSchema= joi.object({
+        to: joi.string().required(),
+        text:joi.string().required(),
+        type: joi.string().valid('private_message','message').required()
+    })
+    const validate= messageSchema.validate(req.body)
+    if(validate.error){
+        return res.sendStatus(422)
     }
 
     try{
-        await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+        const us=await db.collection("participants").findOne({name: user})
+        if(!us){
+            return res.sendStatus(422)
+        }
+       
     } catch(err){
-        res.sendStatus(404)
+        console.log(err.message)
+    }
+
+    try{
+       const men= await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+       if(!men){ return res.sendStatus(404)}
+       else if(men.from !== user){
+        return res.sendStatus(401)
+       }
+    } catch(err){
+        console.log(err.message)
     }
     try{
         await db.collection("messages").updateOne({to: to, type: type, text: text}, {$set : usuarioEditado})
-        res.sendStatus(200)
+        return res.sendStatus(200)
     } catch(err){
-        res.sendStatus(401)
+        console.log(err.message)
     }
 })
 
