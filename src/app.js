@@ -114,7 +114,7 @@ app.get("/participants",(req,res) => {
 })
 
 app.get("/messages", async (req,res)=>{
-    const user= req.headers.user;
+    const {user}= req.headers;
     const limit = parseInt(req.query.limit);
     let newmens=[]
     if (limit){
@@ -148,7 +148,7 @@ app.get("/messages", async (req,res)=>{
 
 //Métodos Bônus - Delete e Put
 app.delete("/messages/:ID_DA_MENSAGEM",async (req,res) =>{
-    const user= req.headers.user;
+    const {user}= req.headers;
     const {ID_DA_MENSAGEM} = req.params;
     try{
         const men= await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
@@ -175,7 +175,7 @@ app.delete("/messages/:ID_DA_MENSAGEM",async (req,res) =>{
 app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
     const {to, type, text}= req.body
     const {ID_DA_MENSAGEM} = req.params;
-    const user= req.headers.user;
+    const {user}= req.headers;
     const usuarioEditado= {to, type, text}
 
      const messageSchema= joi.object({
@@ -214,6 +214,8 @@ app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
         console.log(err.message)
     }
 })
+
+//Remoção de usuários inativos
 
 
 
