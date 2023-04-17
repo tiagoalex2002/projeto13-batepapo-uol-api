@@ -217,7 +217,25 @@ app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
 
 //Remoção de usuários inativos
 
-setInterval(async)
+setInterval(async () => {
+    let time= Date.now() - 10000
+    let now= dayjs()
+    try{
+        const users= await db.collection("participants").find({lastStatus:time})
+        for (let i=0; i< users.length;i++){
+            await db.collection("participants").deleteOne({name:users[i].name})
+            await db.collection("messages").insertOne({ 
+                from: users[i].name,
+                to: 'Todos',
+                text: 'sai da sala...',
+                type: 'status',
+                time: now.format("HH:mm:ss")
+            })
+        }
+
+    }catch(err){
+        console.log(err.message)
+    }}, 15000)
 
 
 
