@@ -132,9 +132,10 @@ app.get("/messages", async (req,res)=>{
         }
        
     }
-    else{
+    if(!limit){
         try{
-            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:`${user}`} ,{from:`${user}`}]}).toArray()
+            const messages= await db.collection("messages").find(
+                {$or :[{to:"Todos"},{to:`${user}`} ,{from:`${user}`}]}).toArray()
             return res.status(200).send(messages)
         } catch(err){
             console.log(err.message)
