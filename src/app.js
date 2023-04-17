@@ -119,7 +119,7 @@ app.get("/messages", async (req,res)=>{
     let newmens=[]
     if (limit){
         try{
-            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:User} ,{from:User}]}).toArray()
+            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:`${User}`} ,{from:`${User}`}]}).toArray()
             if (messages.length >= limit){
                 for(let i=0; i < limit;i++){
                     newmens.push(messages[i])
@@ -136,7 +136,7 @@ app.get("/messages", async (req,res)=>{
     }
     else{
         try{
-            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:User} ,{from:User}]}).toArray()
+            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:`${User}`} ,{from:`${User}`}]}).toArray()
             return res.status(200).send(messages)
         } catch(err){
             console.log(err.message)
@@ -221,7 +221,7 @@ setInterval(async () => {
     let time= Date.now() - 10000
     let now= dayjs()
     try{
-        const users= await db.collection("participants").find({lastStatus:time})
+        const users= await db.collection("participants").find({lastStatus:time}).toArray()
         for (let i=0; i< users.length;i++){
             await db.collection("participants").deleteOne({name:users[i].name})
             await db.collection("messages").insertOne({ 
