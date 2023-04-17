@@ -27,13 +27,14 @@ app.post("/participants",async (req,res)=>{
     if(validation.error){
         return res.sendStatus(422)
     }
-    //try{
-        //let us= await db.collection("participants").findOne({name: req.body.name})
-        //if(us != {}){
-            //res.status(409).send("Usuário já cadastrado")
-       // }
-    //} catch(err){
-    //}
+    try{
+        const us= await db.collection("participants").findOne({name: req.body.name})
+        if(us){
+            return res.sendStatus(409)
+       }
+    } catch(err){
+        console.log(err.message)
+    }
     let now= dayjs()
     try{
         await db.collection("participants").insertOne({name: req.body.name, lastStatus: Date.now()})
@@ -54,7 +55,7 @@ app.post("/messages", async (req,res)=> {
     const messageSchema= joi.object({
         to: joi.string().required(),
         text:joi.string().required(),
-        type: joi.string().required()
+        type: joi.string().valid('private_message','message').required()
     })
     const validate= messageSchema.validate(req.body)
     if(validate.error){
@@ -77,20 +78,23 @@ app.post("/messages", async (req,res)=> {
 })
 
 app.post("/status", async (req,res) => {
-    const name=req.headers.user;
+    const {user}=req.headers;
     let lastStatus= Date.now()
-    const usuarioEditado = { name, lastStatus }
-    if (!name){
+    const usuarioEditado = { user, lastStatus }
+    if (!user){
         return res.sendStatus(404)
     }
     else{
         try{
-            await db.collection("participants").findOne({name: name})
+            const u=await db.collection("participants").findOne({name: user})
+            if (!u){
+                return res.sendStatus(404)
+            }
         } catch(err){
-            res.sendStatus(404)
+            console.log(err.message)
         }
         try{
-            await db.collection("participants").updateOne({name: name}, {$set: usuarioEditado })
+            await db.collection("participants").updateOne({name: user}, {$set: usuarioEditado })
             res.sendStatus(200)
 
         } catch(err){
@@ -112,7 +116,7 @@ app.get("/messages", async (req,res)=>{
     let newmens=[]
     if (!limit){
         try{
-            let messages= await db.collection("messages").find({to:"Todos"} || {to:user} || {from:user}).toArray()
+            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:user} ,{from:user}]}).toArray()
             return res.status(200).send(messages)
         } catch(err){
             console.log(err.message)
@@ -123,7 +127,7 @@ app.get("/messages", async (req,res)=>{
     }
     else{
         try{
-            let messages= await db.collection("messages").find({to:"Todos"} || {to:user} || {from:user}).toArray()
+            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:user} ,{from:user}]}).toArray()
             if (messages.length >= limit){
                 for(let i=0; i < limit;i++){
                     newmens.push(messages[i])
