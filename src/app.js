@@ -82,7 +82,7 @@ app.post("/messages", async (req,res)=> {
 app.post("/status", async (req,res) => {
     const {user}=req.headers;
     let lastStatus= Date.now()
-    const usuarioEditado = { user, lastStatus }
+    const usuarioEditado = { name: user, lastStatus }
     if (!user){
         return res.sendStatus(404)
     }
@@ -219,7 +219,7 @@ setInterval(async () => {
     let time= Date.now() - 10000
     let now= dayjs()
     try{
-        const users= await db.collection("participants").find({lastStatus:time}).toArray()
+        const users= await db.collection("participants").find({ lastStatus: { $lt: time } }).toArray()
         for (let i=0; i< users.length;i++){
             await db.collection("participants").deleteOne({name:users[i].name})
             await db.collection("messages").insertOne({ 
