@@ -114,12 +114,12 @@ app.get("/participants",(req,res) => {
 })
 
 app.get("/messages", async (req,res)=>{
-    const {user}= req.headers;
+    const {User}= req.headers;
     const limit = parseInt(req.query.limit);
     let newmens=[]
     if (limit){
         try{
-            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:user} ,{from:user}]}).toArray()
+            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:User} ,{from:User}]}).toArray()
             if (messages.length >= limit){
                 for(let i=0; i < limit;i++){
                     newmens.push(messages[i])
@@ -136,7 +136,7 @@ app.get("/messages", async (req,res)=>{
     }
     else{
         try{
-            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:user} ,{from:user}]}).toArray()
+            let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:User} ,{from:User}]}).toArray()
             return res.status(200).send(messages)
         } catch(err){
             console.log(err.message)
@@ -148,14 +148,14 @@ app.get("/messages", async (req,res)=>{
 
 //Métodos Bônus - Delete e Put
 app.delete("/messages/:ID_DA_MENSAGEM",async (req,res) =>{
-    const {user}= req.headers;
+    const {User}= req.headers;
     const {ID_DA_MENSAGEM} = req.params;
     try{
         const men= await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
         if (!men){
             return res.sendStatus(404)
         }
-        else if(men.from !== user){
+        else if(men.from !== User){
             return res.sendStatus(401)
         }
         else{
@@ -175,7 +175,7 @@ app.delete("/messages/:ID_DA_MENSAGEM",async (req,res) =>{
 app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
     const {to, type, text}= req.body
     const {ID_DA_MENSAGEM} = req.params;
-    const {user}= req.headers;
+    const {User}= req.headers;
     const usuarioEditado= {to, type, text}
 
      const messageSchema= joi.object({
@@ -189,7 +189,7 @@ app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
     }
 
     try{
-        const us=await db.collection("participants").findOne({name: user})
+        const us=await db.collection("participants").findOne({name: User})
         if(!us){
             return res.sendStatus(422)
         }
@@ -201,7 +201,7 @@ app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
     try{
        const men= await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
        if(!men){ return res.sendStatus(404)}
-       else if(men.from !== user){
+       else if(men.from !== User){
         return res.sendStatus(401)
        }
     } catch(err){
