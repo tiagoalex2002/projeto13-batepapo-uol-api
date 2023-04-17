@@ -117,7 +117,7 @@ app.get("/messages", async (req,res)=>{
     const limit = req.query.limit;
     let newmens=[]
     if (limit ){
-         if( limit === 0 || limit < 0 || isNaN(limit)){
+         if( limit === 0 || limit < 0 || typeof limit !== "number"){
             return res.sendStatus(422)}
         try{
             let messages= await db.collection("messages").find({$or :[{to:"Todos"},{to:`${user}`} ,{from:`${user}`}]}).toArray()
