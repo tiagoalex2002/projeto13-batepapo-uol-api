@@ -147,7 +147,7 @@ app.get("/messages", async (req,res)=>{
 
 
 //Métodos Bônus - Delete e Put
-app.delete("/messages/ID_DA_MENSAGEM",async (req,res) =>{
+app.delete("/messages/:ID_DA_MENSAGEM",async (req,res) =>{
     const user= req.headers.user;
     const {ID_DA_MENSAGEM} = req.params;
     try{
@@ -172,7 +172,7 @@ app.delete("/messages/ID_DA_MENSAGEM",async (req,res) =>{
     }
 })
 
-app.put("/messages/ID_DA_MENSAGEM", async (req, res) => {
+app.put("/messages/:ID_DA_MENSAGEM", async (req, res) => {
     const {to, type, text}= req.body
     const {ID_DA_MENSAGEM} = req.params;
     const user= req.headers.user;
