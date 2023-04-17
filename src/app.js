@@ -52,6 +52,9 @@ app.post("/participants",async (req,res)=>{
 })
 app.post("/messages", async (req,res)=> {
     const user= req.headers.user;
+    if(user){
+        return res.sendStatus(422)
+    }
     const messageSchema= joi.object({
         to: joi.string().required(),
         text:joi.string().required(),
@@ -61,12 +64,12 @@ app.post("/messages", async (req,res)=> {
     if(validate.error){
         return res.sendStatus(422)
     }
-    //try{
-      //  await db.collection("participants").findOne({name: user})
-      //   res.sendStatus(409)
-    //} catch(err){
-       // console.log(err.message)
-   // }
+    try{
+        let us= await db.collection("participants").findOne({name: user})
+        if(us){return res.sendStatus(409)}
+    } catch(err){
+        console.log(err.message)
+   }
     let now= dayjs()
    try{
         await  db.collection("messages").insertOne({from: user, to: req.body.to, text: req.body.text, type: req.body.type, time:now.format("HH:mm:ss")})
