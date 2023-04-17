@@ -52,7 +52,7 @@ app.post("/participants",async (req,res)=>{
 })
 app.post("/messages", async (req,res)=> {
     const user= req.headers.user;
-    if(user){
+    if(!user){
         return res.sendStatus(422)
     }
     const messageSchema= joi.object({
@@ -150,15 +150,24 @@ app.delete("/messages/ID_DA_MENSAGEM",async (req,res) =>{
     const user= req.headers.user;
     const {ID_DA_MENSAGEM} = req.params;
     try{
-        await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+        const men= await db.collection("messages").findOne({_id: new ObjectId(ID_DA_MENSAGEM)})
+        if (!men){
+            return res.sendStatus(404)
+        }
+        else if(men.from !== user){
+            return res.sendStatus(401)
+        }
+        else{
+            res.sendStatus(200)
+        }
     } catch(err){
-        res.sendStatus(404)
+        console.log(err.message)
     }
+
     try{
         await db.collection("messages").deleteOne({_id: new ObjectId(ID_DA_MENSAGEM)})
-        res.sendStatus(200)
     } catch(err){
-        res.sendStatus(401)
+        console.log(message)
     }
 })
 
