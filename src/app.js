@@ -114,9 +114,9 @@ app.get("/participants",(req,res) => {
 
 app.get("/messages", async (req,res)=>{
     const {user}= req.headers;
-    const limit = parseInt(req.query.limit);
+    const limit = req.query.limit;
     let newmens=[]
-    if (limit){
+    if (limit ){
          if( limit === 0 || limit < 0 || isNaN(limit)){
             return res.sendStatus(422)}
         try{
